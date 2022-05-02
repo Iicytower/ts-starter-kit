@@ -19,14 +19,18 @@ function ts-starter-kit (){
   npm init -y
   npm i -D typescript ts-node-dev prettier @types/node
 
-  package=$(cat package.json);
-  rm -rf ./package.json;
-
-  echo $(echo $package | jq '.scripts |= {"prettier": "prettier -w ./**/*.ts", "start": "ts-node-dev --respawn index.ts"}') > indirectFile.json
-
-  node -e "console.log(JSON.stringify(JSON.parse(require('fs').readFileSync(process.argv[1])), null, 2));" indirectFile.json > package.json
-
-  rm -rf indirectFile.json
+  node -e "
+  console.log('[LOG] Start modifying package.json... ');
+  var fs = require('fs');
+  var package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+  console.log('[LOG] Adding start script...');
+  package.scripts.start='ts-node-dev --respawn index.ts'; 
+  console.log('[LOG] Adding prettier script...');
+  package.scripts.prettier='prettier -w ./**/*.ts'; 
+  package.main='dist/index.js';
+  fs.writeFileSync('./package.json', JSON.stringify(package, null, 2), 'utf8');
+  console.log('[LOG] Work finished. :)');
+  "
 }
 
 ```
